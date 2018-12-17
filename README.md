@@ -214,7 +214,7 @@ public class LTSSpringConfig {
 ```
 ## TaskTracker(部署使用)
 需要引入lts的jar包有`lts-tasktracker-{version}.jar`，`lts-core-{version}.jar` 及其它第三方依赖jar。
-###定义自己的任务执行类
+### 定义自己的任务执行类
 ```java
 public class MyJobRunner implements JobRunner {
     @Override
@@ -294,7 +294,7 @@ public class LTSSpringConfig implements ApplicationContextAware {
     }
 }
 ```
-##参数说明
+## 参数说明
 [参数说明](https://qq254963746.gitbooks.io/lts/content/use/config-name.html)
 
 ## 使用建议
@@ -415,7 +415,7 @@ public class Application {
 ## SPI扩展说明
 支持JobLogger,JobQueue等等的SPI扩展
 
-##[和其它解决方案比较](https://qq254963746.gitbooks.io/lts/content/introduce/compareother.html)
+## [和其它解决方案比较](https://qq254963746.gitbooks.io/lts/content/introduce/compareother.html)
 
 
 ## LTS-Admin使用jetty启动(默认)，不定期挂掉解决方案
