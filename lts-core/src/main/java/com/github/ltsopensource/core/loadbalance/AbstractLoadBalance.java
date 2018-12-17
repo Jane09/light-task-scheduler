@@ -3,7 +3,7 @@ package com.github.ltsopensource.core.loadbalance;
 import java.util.List;
 
 /**
- * Robert HG (254963746@qq.com) on 3/25/15.
+ * @author  Robert HG (254963746@qq.com) on 3/25/15.
  */
 public abstract class AbstractLoadBalance implements LoadBalance {
 
