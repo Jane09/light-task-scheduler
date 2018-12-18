@@ -40,7 +40,7 @@ public abstract class AbstractRemoting {
             new ConcurrentHashMap<Integer, ResponseFuture>(256);
     // 注册的各个RPC处理器
     protected final HashMap<Integer/* request code */, Pair<RemotingProcessor, ExecutorService>> processorTable =
-            new HashMap<Integer, Pair<RemotingProcessor, ExecutorService>>(64);
+            new HashMap<>(64);
     protected final RemotingEventExecutor remotingEventExecutor = new RemotingEventExecutor();
     // 默认请求代码处理器
     protected Pair<RemotingProcessor, ExecutorService> defaultRequestProcessor;
@@ -62,51 +62,43 @@ public abstract class AbstractRemoting {
 
     public void processRequestCommand(final Channel channel, final RemotingCommand cmd) {
         final Pair<RemotingProcessor, ExecutorService> matched = this.processorTable.get(cmd.getCode());
-        final Pair<RemotingProcessor, ExecutorService> pair =
-                null == matched ? this.defaultRequestProcessor : matched;
+        final Pair<RemotingProcessor, ExecutorService> pair = null == matched ? this.defaultRequestProcessor : matched;
 
         if (pair != null) {
-            Runnable run = new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        final RemotingCommand response = pair.getKey().processRequest(channel, cmd);
-                        // Oneway形式忽略应答结果
-                        if (!RemotingCommandHelper.isOnewayRPC(cmd)) {
-                            if (response != null) {
-                                response.setOpaque(cmd.getOpaque());
-                                RemotingCommandHelper.markResponseType(cmd);
-                                try {
-                                    channel.writeAndFlush(response).addListener(new ChannelHandlerListener() {
-                                        @Override
-                                        public void operationComplete(Future future) throws Exception {
-                                            if (!future.isSuccess()) {
-                                                LOGGER.error("response to " + RemotingHelper.parseChannelRemoteAddr(channel) + " failed", future.cause());
-                                                LOGGER.error(cmd.toString());
-                                                LOGGER.error(response.toString());
-                                            }
-                                        }
-                                    });
-                                } catch (Exception e) {
-                                    LOGGER.error("process request over, but response failed", e);
-                                    LOGGER.error(cmd.toString());
-                                    LOGGER.error(response.toString());
-                                }
-                            } else {
-                                // 收到请求，但是没有返回应答，可能是processRequest中进行了应答，忽略这种情况
-                            }
-                        }
-                    } catch (Exception e) {
-                        LOGGER.error("process request exception", e);
-                        LOGGER.error(cmd.toString());
-
-                        if (!RemotingCommandHelper.isOnewayRPC(cmd)) {
-                            final RemotingCommand response =
-                                    RemotingCommand.createResponseCommand(RemotingProtos.ResponseCode.SYSTEM_ERROR.code(),//
-                                            StringUtils.toString(e));
+            Runnable run = () -> {
+                try {
+                    final RemotingCommand response = pair.getKey().processRequest(channel, cmd);
+                    // Oneway形式忽略应答结果
+                    if (!RemotingCommandHelper.isOnewayRPC(cmd)) {
+                        if (response != null) {
                             response.setOpaque(cmd.getOpaque());
-                            channel.writeAndFlush(response);
+                            RemotingCommandHelper.markResponseType(cmd);
+                            try {
+                                channel.writeAndFlush(response).addListener(future -> {
+                                    if (!future.isSuccess()) {
+                                        LOGGER.error("response to " + RemotingHelper.parseChannelRemoteAddr(channel) + " failed", future.cause());
+                                        LOGGER.error(cmd.toString());
+                                        LOGGER.error(response.toString());
+                                    }
+                                });
+                            } catch (Exception e) {
+                                LOGGER.error("process request over, but response failed", e);
+                                LOGGER.error(cmd.toString());
+                                LOGGER.error(response.toString());
+                            }
+                        } else {
+                            // 收到请求，但是没有返回应答，可能是processRequest中进行了应答，忽略这种情况
                         }
+                    }
+                } catch (Exception e) {
+                    LOGGER.error("process request exception", e);
+                    LOGGER.error(cmd.toString());
+
+                    if (!RemotingCommandHelper.isOnewayRPC(cmd)) {
+                        final RemotingCommand response =
+                                RemotingCommand.createResponseCommand(RemotingProtos.ResponseCode.SYSTEM_ERROR.code(),StringUtils.toString(e));
+                        response.setOpaque(cmd.getOpaque());
+                        channel.writeAndFlush(response);
                     }
                 }
             };
@@ -115,9 +107,9 @@ public abstract class AbstractRemoting {
                 // 这里需要做流控，要求线程池对应的队列必须是有大小限制的
                 pair.getValue().submit(run);
             } catch (RejectedExecutionException e) {
-                LOGGER.warn(RemotingHelper.parseChannelRemoteAddr(channel) //
-                        + ", too many requests and system thread pool busy, RejectedExecutionException " //
-                        + pair.getKey().toString() //
+                LOGGER.warn(RemotingHelper.parseChannelRemoteAddr(channel)
+                        + ", too many requests and system thread pool busy, RejectedExecutionException "
+                        + pair.getKey().toString()
                         + " request code: " + cmd.getCode());
                 if (!RemotingCommandHelper.isOnewayRPC(cmd)) {
                     final RemotingCommand response =
@@ -151,14 +143,11 @@ public abstract class AbstractRemoting {
                 ExecutorService executor = this.getCallbackExecutor();
                 if (executor != null) {
                     try {
-                        executor.submit(new Runnable() {
-                            @Override
-                            public void run() {
-                                try {
-                                    responseFuture.executeInvokeCallback();
-                                } catch (Exception e) {
-                                    LOGGER.warn("execute callback in executor exception, and callback throw", e);
-                                }
+                        executor.submit(() -> {
+                            try {
+                                responseFuture.executeInvokeCallback();
+                            } catch (Exception e) {
+                                LOGGER.warn("execute callback in executor exception, and callback throw", e);
                             }
                         });
                     } catch (Exception e) {
@@ -234,22 +223,19 @@ public abstract class AbstractRemoting {
             final ResponseFuture responseFuture =
                     new ResponseFuture(request.getOpaque(), timeoutMillis, null, null);
             this.responseTable.put(request.getOpaque(), responseFuture);
-            channel.writeAndFlush(request).addListener(new ChannelHandlerListener() {
-                @Override
-                public void operationComplete(Future future) throws Exception {
-                    if (future.isSuccess()) {
-                        responseFuture.setSendRequestOK(true);
-                        return;
-                    } else {
-                        responseFuture.setSendRequestOK(false);
-                    }
-
-                    responseTable.remove(request.getOpaque());
-                    responseFuture.setCause(future.cause());
-                    responseFuture.putResponse(null);
-                    LOGGER.warn("send a request command to channel <" + channel.remoteAddress() + "> failed.");
-                    LOGGER.warn(request.toString());
+            channel.writeAndFlush(request).addListener(future -> {
+                if (future.isSuccess()) {
+                    responseFuture.setSendRequestOK(true);
+                    return;
+                } else {
+                    responseFuture.setSendRequestOK(false);
                 }
+
+                responseTable.remove(request.getOpaque());
+                responseFuture.setCause(future.cause());
+                responseFuture.putResponse(null);
+                LOGGER.warn("send a request command to channel <" + channel.remoteAddress() + "> failed.");
+                LOGGER.warn(request.toString());
             });
 
             RemotingCommand responseCommand = responseFuture.waitResponse(timeoutMillis);
@@ -283,27 +269,24 @@ public abstract class AbstractRemoting {
                     new ResponseFuture(request.getOpaque(), timeoutMillis, asyncCallback, once);
             this.responseTable.put(request.getOpaque(), responseFuture);
             try {
-                channel.writeAndFlush(request).addListener(new ChannelHandlerListener() {
-                    @Override
-                    public void operationComplete(Future future) throws Exception {
-                        if (future.isSuccess()) {
-                            responseFuture.setSendRequestOK(true);
-                            return;
-                        } else {
-                            responseFuture.setSendRequestOK(false);
-                        }
-
-                        responseFuture.putResponse(null);
-						try {
-							responseFuture.executeInvokeCallback();
-						} finally {
-							responseFuture.release();
-						}
-
-                        responseTable.remove(request.getOpaque());
-                        LOGGER.warn("send a request command to channel <" + channel.remoteAddress() + "> failed.");
-                        LOGGER.warn(request.toString());
+                channel.writeAndFlush(request).addListener(future -> {
+                    if (future.isSuccess()) {
+                        responseFuture.setSendRequestOK(true);
+                        return;
+                    } else {
+                        responseFuture.setSendRequestOK(false);
                     }
+
+                    responseFuture.putResponse(null);
+                    try {
+                        responseFuture.executeInvokeCallback();
+                    } finally {
+                        responseFuture.release();
+                    }
+
+                    responseTable.remove(request.getOpaque());
+                    LOGGER.warn("send a request command to channel <" + channel.remoteAddress() + "> failed.");
+                    LOGGER.warn(request.toString());
                 });
             } catch (Exception e) {
                 once.release();
@@ -331,15 +314,12 @@ public abstract class AbstractRemoting {
         if (acquired) {
             final SemaphoreReleaseOnlyOnce once = new SemaphoreReleaseOnlyOnce(this.semaphoreOneway);
             try {
-                channel.writeAndFlush(request).addListener(new ChannelHandlerListener() {
-                    @Override
-                    public void operationComplete(Future future) throws Exception {
-                        once.release();
-                        if (!future.isSuccess()) {
-                            LOGGER.warn("send a request command to channel <" + channel.remoteAddress()
-                                    + "> failed.");
-                            LOGGER.warn(request.toString());
-                        }
+                channel.writeAndFlush(request).addListener(future -> {
+                    once.release();
+                    if (!future.isSuccess()) {
+                        LOGGER.warn("send a request command to channel <" + channel.remoteAddress()
+                                + "> failed.");
+                        LOGGER.warn(request.toString());
                     }
                 });
             } catch (Exception e) {
