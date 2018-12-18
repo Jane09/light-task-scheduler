@@ -53,11 +53,11 @@ public class AutoConfigContextBuilder {
 
         Iterable<String> prefixes = (StringUtils.hasLength(prefix) ? new RelaxedNames(prefix) : null);
 
-        nameDescriptorMap = new LinkedHashMap<String, PropertyDescriptor>();
-        descriptorNameMap = new HashMap<PropertyDescriptor, Set<String>>();
+        nameDescriptorMap = new LinkedHashMap<>();
+        descriptorNameMap = new HashMap<>(16);
         for (PropertyDescriptor descriptor : propertyDescriptors) {
             String name = descriptor.getName();
-            if (!name.equals("class")) {
+            if (!"class".equals(name)) {
                 RelaxedNames relaxedNames = RelaxedNames.forCamelCase(name);
                 if (prefixes == null) {
                     for (String relaxedName : relaxedNames) {

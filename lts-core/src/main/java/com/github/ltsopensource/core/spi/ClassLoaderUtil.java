@@ -71,21 +71,20 @@ public final class ClassLoaderUtil {
         private final ConcurrentMap<ClassLoader, ConcurrentMap<String, WeakReference<Constructor>>> cache;
 
         private ConstructorCache() {
-            cache = new ConcurrentHashMap<ClassLoader, ConcurrentMap<String, WeakReference<Constructor>>>();
+            cache = new ConcurrentHashMap<>();
         }
 
-        private <T> Constructor put(ClassLoader classLoader, String className, Constructor<T> constructor) {
+        private <T> void put(ClassLoader classLoader, String className, Constructor<T> constructor) {
             ClassLoader cl = classLoader == null ? ClassLoaderUtil.class.getClassLoader() : classLoader;
             ConcurrentMap<String, WeakReference<Constructor>> innerCache = cache.get(cl);
             if (innerCache == null) {
-                innerCache = new ConcurrentHashMap<String, WeakReference<Constructor>>(100);
+                innerCache = new ConcurrentHashMap<>(100);
                 ConcurrentMap<String, WeakReference<Constructor>> old = cache.putIfAbsent(cl, innerCache);
                 if (old != null) {
                     innerCache = old;
                 }
             }
-            innerCache.put(className, new WeakReference<Constructor>(constructor));
-            return constructor;
+            innerCache.put(className, new WeakReference<>(constructor));
         }
 
         @SuppressWarnings("unchecked")
