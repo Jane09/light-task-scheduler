@@ -14,7 +14,7 @@ public class LRUDataCache<K, V> implements DataCache<K, V> {
     private Map<K, V> cache;
 
     public LRUDataCache(final int maxCacheSize) {
-        this.cache = Collections.synchronizedMap(new LRUCache<K, V>(maxCacheSize));
+        this.cache = Collections.synchronizedMap(new LRUCache<>(maxCacheSize));
     }
 
     @Override
