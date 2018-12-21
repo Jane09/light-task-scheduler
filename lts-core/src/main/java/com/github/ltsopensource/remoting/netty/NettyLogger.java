@@ -71,6 +71,11 @@ public class NettyLogger {
         }
 
         @Override
+        public void trace(Throwable throwable) {
+
+        }
+
+        @Override
         public boolean isDebugEnabled() {
             return logger.isDebugEnabled();
         }
@@ -98,6 +103,11 @@ public class NettyLogger {
         @Override
         public void debug(String msg, Throwable t) {
             logger.debug(msg, t);
+        }
+
+        @Override
+        public void debug(Throwable throwable) {
+
         }
 
         @Override
@@ -131,6 +141,11 @@ public class NettyLogger {
         }
 
         @Override
+        public void info(Throwable throwable) {
+
+        }
+
+        @Override
         public boolean isWarnEnabled() {
             return logger.isWarnEnabled();
         }
@@ -161,6 +176,11 @@ public class NettyLogger {
         }
 
         @Override
+        public void warn(Throwable throwable) {
+
+        }
+
+        @Override
         public boolean isErrorEnabled() {
             return logger.isErrorEnabled();
         }
@@ -188,6 +208,11 @@ public class NettyLogger {
         @Override
         public void error(String msg, Throwable t) {
             logger.error(msg, t);
+        }
+
+        @Override
+        public void error(Throwable throwable) {
+
         }
 
         @Override
@@ -328,6 +353,11 @@ public class NettyLogger {
                     error(msg, t);
                     break;
             }
+        }
+
+        @Override
+        public void log(InternalLogLevel internalLogLevel, Throwable throwable) {
+
         }
     }
 }

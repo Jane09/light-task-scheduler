@@ -24,7 +24,7 @@ public class JobExecutionContextImpl implements JobExecutionContext {
     public Scheduler getScheduler() {
         return new Scheduler() {
             @Override
-            public String getSchedulerName() throws SchedulerException {
+            public String getSchedulerName() {
                 return null;
             }
 
@@ -256,6 +256,11 @@ public class JobExecutionContextImpl implements JobExecutionContext {
             @Override
             public Trigger.TriggerState getTriggerState(TriggerKey triggerKey) throws SchedulerException {
                 return null;
+            }
+
+            @Override
+            public void resetTriggerFromErrorState(TriggerKey triggerKey) throws SchedulerException {
+
             }
 
             @Override

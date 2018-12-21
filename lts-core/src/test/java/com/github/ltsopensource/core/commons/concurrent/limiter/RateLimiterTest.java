@@ -8,7 +8,7 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  * @author Robert HG (254963746@qq.com) on 3/16/16.
  */
-public class RateLimiterTest {
+public class    RateLimiterTest {
 
     static volatile boolean stop = false;
 

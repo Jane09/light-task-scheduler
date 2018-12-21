@@ -6,5 +6,5 @@ package com.github.ltsopensource.remoting;
  */
 public interface AsyncCallback {
 
-    public void operationComplete(final ResponseFuture responseFuture);
+    void operationComplete(final ResponseFuture responseFuture);
 }

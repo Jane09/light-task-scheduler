@@ -5,6 +5,7 @@ import com.github.ltsopensource.admin.access.domain.NodeOnOfflineLog;
 import com.github.ltsopensource.admin.access.face.BackendNodeOnOfflineLogAccess;
 import com.github.ltsopensource.admin.request.NodeOnOfflineLogPaginationReq;
 import com.github.ltsopensource.core.cluster.Config;
+import com.github.ltsopensource.core.commons.utils.DateUtils;
 import com.github.ltsopensource.monitor.access.mysql.MysqlAbstractJdbcAccess;
 import com.github.ltsopensource.store.jdbc.builder.*;
 
@@ -41,7 +42,7 @@ public class MysqlBackendNodeOnOfflineLogAccess extends MysqlAbstractJdbcAccess 
                         "identity",
                         "http_cmd_port");
         for (NodeOnOfflineLog nodeOnOfflineLog : nodeOnOfflineLogs) {
-            insertSql.values(nodeOnOfflineLog.getLogTime(),
+            insertSql.values(DateUtils.format(nodeOnOfflineLog.getLogTime(),DateUtils.YMD_HMS),
                     nodeOnOfflineLog.getEvent(),
                     nodeOnOfflineLog.getNodeType().name(),
                     nodeOnOfflineLog.getClusterName(),

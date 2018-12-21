@@ -36,17 +36,16 @@ public class RocksdbTest {
 
         try {
             options.setCreateIfMissing(true)
-                    .createStatistics()
                     .setWriteBufferSize(8 * SizeUnit.KB)
                     .setMaxWriteBufferNumber(3)
                     .setMaxBackgroundCompactions(10)
                     .setCompressionType(CompressionType.SNAPPY_COMPRESSION)
-                    .setCompactionStyle(CompactionStyle.UNIVERSAL);
+                    .setCompactionStyle(CompactionStyle.UNIVERSAL).statistics();
         } catch (IllegalArgumentException e) {
             assert(false);
         }
 
-        Statistics stats = options.statisticsPtr();
+        Statistics stats = options.statistics();
 
         assert(options.createIfMissing() == true);
         assert(options.writeBufferSize() == 8 * SizeUnit.KB);
@@ -80,9 +79,9 @@ public class RocksdbTest {
         options.setAllowMmapReads(true);
         assert(options.tableFactoryName().equals("PlainTable"));
 
-        options.setRateLimiterConfig(new GenericRateLimiterConfig(10000000,
+        options.setRateLimiter(new RateLimiter(10000000,
                 10000, 10));
-        options.setRateLimiterConfig(new GenericRateLimiterConfig(10000000));
+        options.setRateLimiter(new RateLimiter(10000000));
 
 
         Filter bloomFilter = new BloomFilter(10);

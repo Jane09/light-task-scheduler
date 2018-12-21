@@ -5,6 +5,7 @@ import com.github.ltsopensource.core.domain.Pair;
 import com.github.ltsopensource.core.failstore.AbstractFailStore;
 import com.github.ltsopensource.core.failstore.FailStoreException;
 import com.github.ltsopensource.core.json.JSON;
+import org.mapdb.BTreeMap;
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
 
@@ -13,7 +14,6 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentNavigableMap;
 
 /**
  * see http://www.mapdb.org/
@@ -24,7 +24,7 @@ public class MapdbFailStore extends AbstractFailStore {
 
     public static final String name = "mapdb";
     private DB db;
-    private ConcurrentNavigableMap<String, String> map;
+    private BTreeMap<String, String> map;
 
     public MapdbFailStore(File dbPath, boolean needLock) {
         super(dbPath, needLock);
@@ -36,7 +36,7 @@ public class MapdbFailStore extends AbstractFailStore {
             String dbName = dbPath.getPath() + "/lts.db";
             db = DBMaker.fileDB(new File(dbName))
                     .closeOnJvmShutdown()
-                    .encryptionEnable("lts")
+//                    .encryptionEnable("lts")
                     .make();
         } catch (Exception e) {
             throw new FailStoreException(e);
@@ -49,9 +49,10 @@ public class MapdbFailStore extends AbstractFailStore {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void open() throws FailStoreException {
         try {
-            map = db.treeMap("lts");
+            map = (BTreeMap<String, String>) db.treeMap("lts").open();
             db.commit();
         } catch (Exception e) {
             throw new FailStoreException(e);
@@ -101,7 +102,6 @@ public class MapdbFailStore extends AbstractFailStore {
 
     @Override
     public <T> List<Pair<String, T>> fetchTop(int size, Type type) throws FailStoreException {
-
         List<Pair<String, T>> list = new ArrayList<Pair<String, T>>(size);
         if (map.size() == 0) {
             return list;
@@ -109,7 +109,7 @@ public class MapdbFailStore extends AbstractFailStore {
         for (Map.Entry<String, String> entry : map.entrySet()) {
             String key = entry.getKey();
             T value = JSON.parse(entry.getValue(), type);
-            Pair<String, T> pair = new Pair<String, T>(key, value);
+            Pair<String, T> pair = new Pair<>(key, value);
             list.add(pair);
             if (list.size() >= size) {
                 break;

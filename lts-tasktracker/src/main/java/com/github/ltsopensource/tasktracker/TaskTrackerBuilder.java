@@ -10,6 +10,7 @@ import com.github.ltsopensource.tasktracker.runner.JobRunner;
 import java.util.Map;
 
 /**
+ *
  * @author Robert HG (254963746@qq.com) on 4/21/16.
  */
 public class TaskTrackerBuilder extends AbstractNodeBuilder<TaskTracker, TaskTrackerBuilder> {
