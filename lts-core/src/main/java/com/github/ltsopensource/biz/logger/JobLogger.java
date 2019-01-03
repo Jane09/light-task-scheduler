@@ -13,9 +13,9 @@ import java.util.List;
  */
 public interface JobLogger {
 
-    public void log(JobLogPo jobLogPo);
+    void log(JobLogPo jobLogPo);
 
-    public void log(List<JobLogPo> jobLogPos);
+    void log(List<JobLogPo> jobLogPos);
 
-    public PaginationRsp<JobLogPo> search(JobLoggerRequest request);
+    PaginationRsp<JobLogPo> search(JobLoggerRequest request);
 }

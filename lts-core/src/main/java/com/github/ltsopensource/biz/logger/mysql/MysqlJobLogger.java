@@ -113,7 +113,7 @@ public class MysqlJobLogger extends JdbcAbstractAccess implements JobLogger {
     @Override
     public PaginationRsp<JobLogPo> search(JobLoggerRequest request) {
 
-        PaginationRsp<JobLogPo> response = new PaginationRsp<JobLogPo>();
+        PaginationRsp<JobLogPo> response = new PaginationRsp<>();
 
         Long results = new SelectSql(getSqlTemplate())
                 .select()

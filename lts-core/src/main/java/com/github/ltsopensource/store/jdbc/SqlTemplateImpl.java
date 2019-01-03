@@ -36,7 +36,8 @@ class SqlTemplateImpl implements SqlTemplate {
     private void close(Connection conn) throws SQLException {
         if (conn != null) {
             if (conn.isReadOnly()) {
-                conn.setReadOnly(false);  // restore NOT readOnly before return to pool
+                // restore NOT readOnly before return to pool
+                conn.setReadOnly(false);
             }
             conn.close();
         }
@@ -56,12 +57,7 @@ class SqlTemplateImpl implements SqlTemplate {
     }
 
     public int[] batchUpdate(final String sql, final Object[][] params) throws SQLException {
-        return execute(false, new SqlExecutor<int[]>() {
-            @Override
-            public int[] run(Connection conn) throws SQLException {
-                return batchUpdate(conn, sql, params);
-            }
-        });
+        return execute(false, conn -> batchUpdate(conn, sql, params));
     }
 
     @Override
@@ -70,12 +66,7 @@ class SqlTemplateImpl implements SqlTemplate {
     }
 
     public int update(final String sql, final Object... params) throws SQLException {
-        return execute(false, new SqlExecutor<Integer>() {
-            @Override
-            public Integer run(Connection conn) throws SQLException {
-                return update(conn, sql, params);
-            }
-        });
+        return execute(false, conn -> update(conn, sql, params));
     }
 
     @Override
@@ -88,12 +79,7 @@ class SqlTemplateImpl implements SqlTemplate {
     }
 
     public <T> T query(final String sql, final ResultSetHandler<T> rsh, final Object... params) throws SQLException {
-        return execute(true, new SqlExecutor<T>() {
-            @Override
-            public T run(Connection conn) throws SQLException {
-                return query(conn, sql, rsh, params);
-            }
-        });
+        return execute(true, conn -> query(conn, sql, rsh, params));
     }
 
     public <T> T query(final Connection conn, final String sql, final ResultSetHandler<T> rsh, final Object... params) throws SQLException {

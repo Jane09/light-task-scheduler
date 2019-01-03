@@ -56,7 +56,7 @@ public class FileUtils {
     public static String read(InputStream is, String encoding) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(is, encoding));
         StringBuilder content = new StringBuilder();
-        String data = null;
+        String data;
         while ((data = br.readLine()) != null) {
             content.append(data);
             content.append(Constants.LINE_SEPARATOR);
