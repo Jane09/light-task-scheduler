@@ -10,19 +10,19 @@ import java.util.List;
  */
 public interface FailStore {
 
-    public String getPath();
+    String getPath();
 
-    public void open() throws FailStoreException;
+    void open() throws FailStoreException;
 
-    public void put(String key, Object value) throws FailStoreException;
+    void put(String key, Object value) throws FailStoreException;
 
-    public void delete(String key) throws FailStoreException;
+    void delete(String key) throws FailStoreException;
 
-    public void delete(List<String> keys) throws FailStoreException;
+    void delete(List<String> keys) throws FailStoreException;
 
-    public <T> List<Pair<String, T>> fetchTop(int size, Type type) throws FailStoreException;
+    <T> List<Pair<String, T>> fetchTop(int size, Type type) throws FailStoreException;
 
-    public void close() throws FailStoreException;
+    void close() throws FailStoreException;
 
-    public void destroy() throws FailStoreException;
+    void destroy() throws FailStoreException;
 }

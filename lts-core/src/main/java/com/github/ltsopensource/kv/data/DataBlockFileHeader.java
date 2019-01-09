@@ -63,7 +63,7 @@ public class DataBlockFileHeader extends AbstractFileHeader {
         this.aliveNum.set(aliveNum);
     }
 
-    public boolean isFull() {
+    public boolean  isFull() {
         return isFull == 1;
     }
 

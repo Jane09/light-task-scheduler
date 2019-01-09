@@ -46,26 +46,14 @@ public class StoreTxLogEngine<K, V> {
         // 从path里面读取老的Log文件
         FileUtils.createDirIfNotExist(logPath);
 
-        String[] logFiles = logPath.list(new FilenameFilter() {
-            @Override
-            public boolean accept(File file, String name) {
-                return name.endsWith(LOG_FILE_SUFFIX);
-            }
-        });
+        String[] logFiles = logPath.list((file, name) -> name.endsWith(LOG_FILE_SUFFIX));
 
         if (logFiles == null) {
             throw new IOException("can't list file in " + logPath);
         }
 
         if (logFiles.length > 0) {
-
-            Arrays.sort(logFiles, new Comparator<String>() {
-                @Override
-                public int compare(String left, String right) {
-                    return left.compareTo(right);
-                }
-            });
-
+            Arrays.sort(logFiles, String::compareTo);
             for (int i = 0; i < logFiles.length; i++) {
                 String logFile = logFiles[i];
                 boolean isWritable = ++i == logFiles.length;

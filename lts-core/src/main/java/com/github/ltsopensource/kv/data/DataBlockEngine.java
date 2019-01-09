@@ -58,12 +58,7 @@ public class DataBlockEngine<K, V> {
             throw e;
         }
 
-        String[] dataFiles = dataPath.list(new FilenameFilter() {
-            @Override
-            public boolean accept(File file, String name) {
-                return name.endsWith(DataBlock.FILE_SUFFIX);
-            }
-        });
+        String[] dataFiles = dataPath.list((file, name) -> name.endsWith(DataBlock.FILE_SUFFIX));
 
         if (dataFiles.length == 0) {
             return;
