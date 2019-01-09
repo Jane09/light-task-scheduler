@@ -30,7 +30,7 @@ public class MemIndex<K, V> implements Index<K, V> {
     private IndexSnapshot<K, V> indexSnapshot;
 
     public MemIndex(final StoreConfig storeConfig, DataBlockEngine<K, V> dataBlockEngine, DataCache<K, V> dataCache) {
-        this.indexMap = new ConcurrentSkipListMap<K, IndexItem<K>>();
+        this.indexMap = new ConcurrentSkipListMap<>();
         this.storeConfig = storeConfig;
         this.dataBlockEngine = dataBlockEngine;
         this.dataCache = dataCache;

@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
 
 /**
  * JSON 序列化
@@ -19,13 +20,13 @@ public class JsonStoreSerializer implements StoreSerializer {
     public void serialize(Object value, OutputStream out) throws IOException {
         String v = JSON.toJSONString(value);
         if (v != null) {
-            out.write(v.getBytes("UTF-8"));
+            out.write(v.getBytes(StandardCharsets.UTF_8));
         }
     }
 
     @Override
     public <T> T deserialize(InputStream in, Type type) throws IOException {
-        String v = FileUtils.read(in, "UTF-8");
+        String v = FileUtils.read(in, StandardCharsets.UTF_8.displayName());
         return JSON.parse(v, type);
     }
 }

@@ -15,9 +15,9 @@ public interface Index<K, V> {
 
     void putIndexItem(StoreTxLogPosition txLogResult, K key, IndexItem<K> indexItem);
 
-    public int size();
+    int size();
 
-    public boolean containsKey(K key);
+    boolean containsKey(K key);
 
     DBIterator<Entry<K, V>> iterator();
 

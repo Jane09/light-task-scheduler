@@ -127,10 +127,10 @@ public class StoreTxLogEngine<K, V> {
         long timestamp = System.currentTimeMillis();
         switch (op) {
             case PUT:
-                entry = new StoreTxLogEntry<K, V>(op, key, value, timestamp);
+                entry = new StoreTxLogEntry<>(op, key, value, timestamp);
                 break;
             case REMOVE:
-                entry = new StoreTxLogEntry<K, V>(op, key, timestamp);
+                entry = new StoreTxLogEntry<>(op, key, timestamp);
                 break;
         }
 
